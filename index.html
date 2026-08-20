@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#14284a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pincode" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <title>Pincode – lokaal prototype</title>
+  <style>
+    :root{
+      --bg:#0f1f3a;
+      --panel:#172c4f;
+      --panel2:#1e3761;
+      --text:#f7fbff;
+      --muted:#b9c8dd;
+      --accent:#74e6c2;
+      --accent2:#8fc9ff;
+      --danger:#ff6b7a;
+      --warning:#ffd166;
+      --ok:#72e096;
+      --line:rgba(255,255,255,.12);
+      --shadow:0 14px 40px rgba(0,0,0,.25);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(116,230,194,.12), transparent 28rem),
+        radial-gradient(circle at 90% 20%, rgba(143,201,255,.10), transparent 30rem),
+        var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      width:min(980px, calc(100% - 28px));
+      margin:0 auto;
+      padding:calc(28px + env(safe-area-inset-top)) 0 calc(50px + env(safe-area-inset-bottom));
+    }
+    header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:22px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:clamp(30px, 6vw, 54px);
+      letter-spacing:.05em;
+    }
+    .brand p{margin:4px 0 0;color:var(--muted)}
+    .badge{
+      border:1px solid var(--line);
+      color:var(--accent);
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      padding:22px;
+      margin-bottom:18px;
+      backdrop-filter: blur(10px);
+    }
+    h2,h3{margin-top:0}
+    h2{font-size:24px}
+    h3{font-size:18px;margin-bottom:10px}
+    p{line-height:1.5}
+    .muted{color:var(--muted)}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .grid3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width:700px){
+      .grid,.grid3{grid-template-columns:1fr}
+      header{align-items:flex-start}
+      .badge{display:none}
+    }
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:7px;
+    }
+    input,select{
+      width:100%;
+      border:1px solid var(--line);
+      background:#0f2341;
+      color:var(--text);
+      border-radius:14px;
+      padding:14px 15px;
+      font-size:17px;
+      outline:none;
+    }
+    input:focus,select:focus{
+      border-color:var(--accent2);
+      box-shadow:0 0 0 3px rgba(143,201,255,.12);
+    }
+    button{
+      appearance:none;
+      border:0;
+      border-radius:14px;
+      padding:13px 17px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+    .primary{background:var(--accent);color:#08261e}
+    .secondary{background:#2a4774;color:var(--text)}
+    .danger{background:var(--danger);color:white}
+    .ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .space{justify-content:space-between}
+    .hidden{display:none !important}
+    .player-inputs{display:grid;gap:10px;margin-top:12px}
+    .statusbar{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+    .pill{
+      padding:8px 11px;
+      border-radius:999px;
+      background:#122747;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:14px;
+    }
+    .pill strong{color:var(--text)}
+    .dice-entry{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:9px;
+      max-width:430px;
+      margin:14px 0;
+    }
+    .dice-entry input{
+      text-align:center;
+      font-size:28px;
+      padding:13px 2px;
+      font-weight:800;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:10px;
+      overflow:hidden;
+    }
+    th,td{
+      padding:13px 10px;
+      text-align:left;
+      border-bottom:1px solid var(--line);
+    }
+    th{color:var(--muted);font-size:13px;font-weight:600}
+    td.score{
+      font-size:21px;
+      font-weight:800;
+    }
+    .check{color:var(--ok)}
+    .question{color:var(--warning)}
+    .player-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      margin:10px 0;
+      background:rgba(255,255,255,.025);
+    }
+    .player-card.eliminated{opacity:.5}
+    .player-card.correct{
+      border-color:rgba(114,224,150,.6);
+      background:rgba(114,224,150,.07);
+    }
+    .guess-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:9px;
+      align-items:end;
+      margin-top:10px;
+    }
+    @media (max-width:560px){
+      .guess-row{grid-template-columns:1fr}
+    }
+    .note{
+      padding:12px 14px;
+      border-left:4px solid var(--accent2);
+      background:rgba(143,201,255,.07);
+      border-radius:10px;
+      color:var(--muted);
+      margin:12px 0;
+    }
+    .winner{
+      text-align:center;
+      padding:28px 18px;
+    }
+    .winner .big{
+      font-size:56px;
+      margin-bottom:8px;
+    }
+    .winner h2{font-size:32px;margin-bottom:8px}
+    .round-history{
+      display:grid;
+      gap:9px;
+    }
+    .history-item{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      border-radius:14px;
+      padding:12px 14px;
+    }
+    .history-item summary{
+      cursor:pointer;
+      font-weight:700;
+    }
+    .tiny{font-size:12px;color:var(--muted)}
+    .footer-note{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding-top:8px;
+    }
+    .turn-card{
+      margin-top:14px;
+      padding:16px 18px;
+      border-radius:16px;
+      background:rgba(116,230,194,.10);
+      border:1px solid rgba(116,230,194,.35);
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .turn-icon{
+      font-size:26px;
+      line-height:1;
+    }
+    .turn-card strong{
+      display:block;
+      font-size:20px;
+      color:var(--accent);
+    }
+    .turn-card span{
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    details.debug-panel{
+      margin-top:18px;
+      border:1px dashed rgba(255,255,255,.22);
+      border-radius:16px;
+      padding:0;
+      overflow:hidden;
+      background:rgba(255,255,255,.02);
+    }
+    details.debug-panel summary{
+      cursor:pointer;
+      padding:15px 16px;
+      font-weight:700;
+      color:var(--muted);
+      list-style:none;
+    }
+    details.debug-panel summary::-webkit-details-marker{display:none}
+    .debug-inner{
+      padding:0 16px 16px;
+      border-top:1px solid var(--line);
+    }
+    .debug-warning{
+      color:var(--warning);
+      font-size:13px;
+      margin:12px 0;
+    }
+    .secret-list{
+      display:grid;
+      gap:8px;
+      margin:12px 0;
+    }
+    .secret-row{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:center;
+      padding:10px 12px;
+      background:#102542;
+      border:1px solid var(--line);
+      border-radius:12px;
+    }
+    .secret-code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em;
+      font-size:20px;
+      font-weight:800;
+      color:var(--accent2);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>PINCODE</h1>
+        <p>Lokaal prototype – geen internet nodig tijdens het spelen.</p>
+      </div>
+      <div class="badge">1–4 spelers</div>
+    </header>
+
+    <section id="setup" class="card">
+      <h2>Nieuw spel</h2>
+      <div class="grid">
+        <div>
+          <label for="difficulty">Moeilijkheid</label>
+          <select id="difficulty">
+            <option value="easy">Makkelijk – geen dubbele cijfers</option>
+            <option value="hard">Moeilijk – dubbele cijfers toegestaan</option>
+          </select>
+        </div>
+        <div>
+          <label for="playerCount">Aantal spelers</label>
+          <select id="playerCount">
+            <option value="1">1 speler</option>
+            <option value="2" selected>2 spelers</option>
+            <option value="3">3 spelers</option>
+            <option value="4">4 spelers</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="playerInputs" class="player-inputs"></div>
+
+      <div class="note">
+        De geheime pincodes worden alleen op de achtergrond gegenereerd en nergens tijdens het spel getoond.
+      </div>
+
+      <div class="row">
+        <button id="startBtn" class="primary">Start spel</button>
+        <button id="resumeBtn" class="secondary hidden">Hervat opgeslagen spel</button>
+      </div>
+    </section>
+
+    <section id="game" class="hidden">
+      <div class="card">
+        <div class="row space">
+          <div>
+            <h2 id="roundTitle">Ronde 1</h2>
+            <div class="statusbar" id="statusbar"></div>
+          </div>
+          <button id="resetBtn" class="danger">Spel annuleren</button>
+        </div>
+        <div id="turnCard" class="turn-card">
+          <div class="turn-icon">🎲</div>
+          <div>
+            <strong id="throwerText"></strong>
+            <span>Deze speler gooit de dobbelstenen en kiest de volgorde.</span>
+          </div>
+        </div>
+
+        <div id="cancelConfirm" class="note hidden" style="border-left-color:var(--danger); margin-top:14px;">
+          <strong style="color:var(--text)">Huidig spel annuleren?</strong>
+          <div class="muted" style="margin:5px 0 10px">De voortgang en geheime codes van dit spel worden gewist.</div>
+          <div class="row">
+            <button id="confirmCancelBtn" class="danger">Ja, annuleer spel</button>
+            <button id="keepPlayingBtn" class="secondary">Verder spelen</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="rollCard" class="card">
+        <h3>1. Voer de geworpen pincode in</h3>
+        <p class="muted">Zet de vier dobbelstenen in de gekozen volgorde en voer de cijfers hieronder in.</p>
+        <div id="diceEntry" class="dice-entry"></div>
+        <button id="scoreBtn" class="primary">Toon resultaten</button>
+      </div>
+
+      <div id="resultsCard" class="card hidden">
+        <h3>2. Resultaten voor alle spelers</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Speler</th>
+              <th><span class="check">✓</span> juiste positie</th>
+              <th><span class="question">?</span> andere positie</th>
+              <th>Fouten</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+        <div class="note">Iedereen kan nu puzzelen. Daarna kan iedere actieve speler één gok doen of overslaan.</div>
+      </div>
+
+      <div id="guessCard" class="card hidden">
+        <h3>3. Pincode raden</h3>
+        <div id="guessPlayers"></div>
+        <div class="row" style="margin-top:14px">
+          <button id="finishRoundBtn" class="primary">Ronde afronden</button>
+        </div>
+        <p class="tiny">Een fout antwoord telt als één foutpoging. Na 3 fouten ligt de speler uit het spel. Meerdere juiste antwoorden in dezelfde ronde leveren gezamenlijke winnaars op.</p>
+      </div>
+
+      <div id="winnerCard" class="card hidden winner">
+        <div class="big">🏆</div>
+        <h2 id="winnerTitle">Gewonnen!</h2>
+        <p id="winnerText" class="muted"></p>
+        <button id="winnerResetBtn" class="primary">Nieuw spel</button>
+      </div>
+
+      <div id="historyCard" class="card hidden">
+        <h3>Rondehistorie</h3>
+        <div id="history" class="round-history"></div>
+      </div>
+
+      <div class="card">
+        <details id="debugPanel" class="debug-panel">
+          <summary>🛠 Testcontrole – tik om geheime codes te tonen</summary>
+          <div class="debug-inner">
+            <p class="debug-warning">
+              Alleen gebruiken om de hintberekening te controleren. Laat spelers hier tijdens een normaal spel niet kijken.
+            </p>
+            <div id="secretList" class="secret-list"></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <div class="footer-note">Prototype voor privégebruik bij het bordspel Pincode.</div>
+  </div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "pincode_pwa_v1";
+
+  const deepClone = obj => JSON.parse(JSON.stringify(obj));
+
+  const els = {
+    setup: document.getElementById("setup"),
+    game: document.getElementById("game"),
+    difficulty: document.getElementById("difficulty"),
+    playerCount: document.getElementById("playerCount"),
+    playerInputs: document.getElementById("playerInputs"),
+    startBtn: document.getElementById("startBtn"),
+    resumeBtn: document.getElementById("resumeBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    confirmCancelBtn: document.getElementById("confirmCancelBtn"),
+    keepPlayingBtn: document.getElementById("keepPlayingBtn"),
+    cancelConfirm: document.getElementById("cancelConfirm"),
+    winnerResetBtn: document.getElementById("winnerResetBtn"),
+    roundTitle: document.getElementById("roundTitle"),
+    statusbar: document.getElementById("statusbar"),
+    throwerText: document.getElementById("throwerText"),
+    diceEntry: document.getElementById("diceEntry"),
+    scoreBtn: document.getElementById("scoreBtn"),
+    rollCard: document.getElementById("rollCard"),
+    resultsCard: document.getElementById("resultsCard"),
+    resultsBody: document.getElementById("resultsBody"),
+    guessCard: document.getElementById("guessCard"),
+    guessPlayers: document.getElementById("guessPlayers"),
+    finishRoundBtn: document.getElementById("finishRoundBtn"),
+    winnerCard: document.getElementById("winnerCard"),
+    winnerTitle: document.getElementById("winnerTitle"),
+    winnerText: document.getElementById("winnerText"),
+    historyCard: document.getElementById("historyCard"),
+    history: document.getElementById("history"),
+    debugPanel: document.getElementById("debugPanel"),
+    secretList: document.getElementById("secretList")
+  };
+
+  let state = null;
+
+  function randDigit() {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0] % 10;
+  }
+
+  function generateCode(difficulty) {
+    if (difficulty === "hard") {
+      return Array.from({length:4}, randDigit).join("");
+    }
+    const pool = [...Array(10).keys()];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const a = new Uint32Array(1);
+      crypto.getRandomValues(a);
+      const j = a[0] % (i + 1);
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0,4).join("");
+  }
+
+  // Mastermind-vergelijking:
+  // eerst exacte posities; daarna resterende frequenties voor verkeerde posities.
+  function compareCodes(secret, roll) {
+    const s = secret.split("");
+    const r = roll.split("");
+    let exact = 0;
+    const sRest = [];
+    const rRest = [];
+
+    for (let i=0;i<4;i++) {
+      if (s[i] === r[i]) exact++;
+      else {
+        sRest.push(s[i]);
+        rRest.push(r[i]);
+      }
+    }
+
+    const freq = {};
+    sRest.forEach(d => freq[d] = (freq[d] || 0) + 1);
+
+    let misplaced = 0;
+    rRest.forEach(d => {
+      if ((freq[d] || 0) > 0) {
+        misplaced++;
+        freq[d]--;
+      }
+    });
+
+    return {exact, misplaced};
+  }
+
+  function save() {
+    if (state) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function loadSaved() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY));
+    } catch {
+      return null;
+    }
+  }
+
+  function clearSaved() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  function buildPlayerInputs() {
+    const n = Number(els.playerCount.value);
+    els.playerInputs.innerHTML = "";
+    for (let i=0;i<n;i++) {
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `
+        <label for="player_${i}">Naam speler ${i+1}</label>
+        <input id="player_${i}" maxlength="24" autocomplete="off" value="Speler ${i+1}">
+      `;
+      els.playerInputs.appendChild(wrap);
+    }
+  }
+
+  function buildDiceInputs() {
+    els.diceEntry.innerHTML = "";
+    for (let i=0;i<4;i++) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.pattern = "[0-9]*";
+      input.maxLength = 1;
+      input.setAttribute("aria-label", `Cijfer ${i+1}`);
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g,"").slice(0,1);
+        if (input.value && i < 3) {
+          els.diceEntry.children[i+1].focus();
+        }
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && i > 0) {
+          els.diceEntry.children[i-1].focus();
+        }
+      });
+      els.diceEntry.appendChild(input);
+    }
+  }
+
+  function getRoll() {
+    return [...els.diceEntry.querySelectorAll("input")].map(x => x.value).join("");
+  }
+
+  function activePlayers() {
+    return state.players.filter(p => !p.eliminated);
+  }
+
+  function nextThrowerIndex(currentIndex) {
+    if (!state.players.length) return 0;
+    for (let step=1;step<=state.players.length;step++) {
+      const idx = (currentIndex + step) % state.players.length;
+      if (!state.players[idx].eliminated) return idx;
+    }
+    return currentIndex;
+  }
+
+  function renderStatus() {
+    els.roundTitle.textContent = `Ronde ${state.round}`;
+    const diffText = state.difficulty === "easy" ? "Makkelijk" : "Moeilijk";
+    const active = activePlayers().length;
+    els.statusbar.innerHTML = `
+      <span class="pill">Niveau: <strong>${diffText}</strong></span>
+      <span class="pill">Actief: <strong>${active}/${state.players.length}</strong></span>
+    `;
+    const thrower = state.players[state.throwerIndex];
+    els.throwerText.textContent = thrower && !thrower.eliminated
+      ? `${thrower.name} is aan de beurt`
+      : "Geen actieve speler";
+  }
+
+  function startGame() {
+    const count = Number(els.playerCount.value);
+    const names = [];
+    for (let i=0;i<count;i++) {
+      const raw = document.getElementById(`player_${i}`).value.trim();
+      names.push(raw || `Speler ${i+1}`);
+    }
+
+    state = {
+      version: 1,
+      difficulty: els.difficulty.value,
+      round: 1,
+      throwerIndex: 0,
+      phase: "roll",
+      currentRoll: null,
+      currentResults: null,
+      roundGuesses: {},
+      history: [],
+      players: names.map((name,i) => ({
+        id: i,
+        name,
+        secret: generateCode(els.difficulty.value),
+        wrong: 0,
+        eliminated: false
+      }))
+    };
+
+    save();
+    showGame();
+  }
+
+  function showGame() {
+    els.setup.classList.add("hidden");
+    els.game.classList.remove("hidden");
+    els.cancelConfirm.classList.add("hidden");
+    if (els.debugPanel) els.debugPanel.open = false;
+    buildDiceInputs();
+    restorePhase();
+    renderStatus();
+    renderHistory();
+    renderSecrets();
+  }
+
+  function restorePhase() {
+    els.rollCard.classList.toggle("hidden", state.phase !== "roll");
+    els.resultsCard.classList.toggle("hidden", !["results","guesses"].includes(state.phase));
+    els.guessCard.classList.toggle("hidden", state.phase !== "guesses");
+    els.winnerCard.classList.toggle("hidden", state.phase !== "ended");
+
+    if (state.currentRoll && state.phase !== "roll") {
+      renderResults();
+      renderGuesses();
+    }
+    if (state.phase === "ended") {
+      renderEndState();
+    }
+  }
+
+  function renderResults() {
+    els.resultsBody.innerHTML = "";
+    state.players.forEach(p => {
+      if (p.eliminated) return;
+      const res = state.currentResults[p.id];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(p.name)}</td>
+        <td class="score check">${res.exact}</td>
+        <td class="score question">${res.misplaced}</td>
+        <td>${p.wrong}/3</td>
+      `;
+      els.resultsBody.appendChild(tr);
+    });
+  }
+
+  function renderGuesses() {
+    els.guessPlayers.innerHTML = "";
+
+    state.players.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "player-card";
+      if (p.eliminated) card.classList.add("eliminated");
+
+      const existing = state.roundGuesses[p.id];
+
+      if (p.eliminated) {
+        card.innerHTML = `<strong>${escapeHtml(p.name)}</strong><div class="muted">Uitgeschakeld na 3 foutpogingen.</div>`;
+      } else if (existing) {
+        if (existing.correct) card.classList.add("correct");
+        card.innerHTML = `
+          <div class="row space">
+            <strong>${escapeHtml(p.name)}</strong>
+            <span>${existing.skipped ? "Overgeslagen" : existing.correct ? "✓ Goed geraden" : "✕ Fout"}</span>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="row space">
+            <strong>${escapeHtml(p.name)}</strong>
+            <span class="muted">${p.wrong}/3 fouten</span>
+          </div>
+          <div class="guess-row">
+            <div>
+              <label>Gok (4 cijfers)</label>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" data-guess="${p.id}" placeholder="bijv. 5072">
+            </div>
+            <div class="row">
+              <button class="secondary" data-skip="${p.id}">Overslaan</button>
+              <button class="primary" data-submit="${p.id}">Controleer</button>
+            </div>
+          </div>
+        `;
+      }
+      els.guessPlayers.appendChild(card);
+    });
+
+    els.guessPlayers.querySelectorAll("[data-guess]").forEach(input => {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g,"").slice(0,4);
+      });
+    });
+
+    els.guessPlayers.querySelectorAll("[data-submit]").forEach(btn => {
+      btn.addEventListener("click", () => submitGuess(Number(btn.dataset.submit)));
+    });
+    els.guessPlayers.querySelectorAll("[data-skip]").forEach(btn => {
+      btn.addEventListener("click", () => skipGuess(Number(btn.dataset.skip)));
+    });
+  }
+
+  function submitGuess(playerId) {
+    const player = state.players.find(p => p.id === playerId);
+    const input = els.guessPlayers.querySelector(`[data-guess="${playerId}"]`);
+    const guess = input.value.trim();
+
+    if (!/^\d{4}$/.test(guess)) {
+      alert("Voer precies 4 cijfers in.");
+      input.focus();
+      return;
+    }
+
+    const correct = guess === player.secret;
+    state.roundGuesses[playerId] = {guess, correct, skipped:false};
+
+    if (!correct) {
+      player.wrong++;
+      if (player.wrong >= 3) player.eliminated = true;
+    }
+
+    save();
+    renderResults();
+    renderGuesses();
+    renderStatus();
+  }
+
+  function skipGuess(playerId) {
+    state.roundGuesses[playerId] = {guess:null, correct:false, skipped:true};
+    save();
+    renderGuesses();
+  }
+
+  function scoreRoll() {
+    const roll = getRoll();
+    if (!/^\d{4}$/.test(roll)) {
+      alert("Voer alle vier dobbelsteencijfers in.");
+      return;
+    }
+
+    state.currentRoll = roll;
+    state.currentResults = {};
+    state.players.forEach(p => {
+      if (!p.eliminated) state.currentResults[p.id] = compareCodes(p.secret, roll);
+    });
+    state.roundGuesses = {};
+    state.phase = "guesses";
+    save();
+
+    els.rollCard.classList.add("hidden");
+    els.resultsCard.classList.remove("hidden");
+    els.guessCard.classList.remove("hidden");
+    renderResults();
+    renderGuesses();
+    window.scrollTo({top: els.resultsCard.offsetTop - 10, behavior:"smooth"});
+  }
+
+  function finishRound() {
+    const stillNeedChoice = state.players.some(p => !p.eliminated && !state.roundGuesses[p.id]);
+    if (stillNeedChoice) {
+      const ok = confirm("Niet alle actieve spelers hebben geraden of overgeslagen. Ronde toch afronden?");
+      if (!ok) return;
+      state.players.forEach(p => {
+        if (!p.eliminated && !state.roundGuesses[p.id]) {
+          state.roundGuesses[p.id] = {guess:null, correct:false, skipped:true};
+        }
+      });
+    }
+
+    const winners = state.players.filter(p => state.roundGuesses[p.id]?.correct);
+
+    state.history.push({
+      round: state.round,
+      roll: state.currentRoll,
+      results: deepClone(state.currentResults),
+      guesses: deepClone(state.roundGuesses)
+    });
+
+    if (winners.length) {
+      state.phase = "ended";
+      state.endReason = "winners";
+      state.winnerIds = winners.map(p => p.id);
+      save();
+      renderHistory();
+      restorePhase();
+      window.scrollTo({top: els.winnerCard.offsetTop - 10, behavior:"smooth"});
+      return;
+    }
+
+    if (activePlayers().length === 0) {
+      state.phase = "ended";
+      state.endReason = "all_eliminated";
+      state.winnerIds = [];
+      save();
+      renderHistory();
+      restorePhase();
+      return;
+    }
+
+    state.throwerIndex = nextThrowerIndex(state.throwerIndex);
+    state.round++;
+    state.currentRoll = null;
+    state.currentResults = null;
+    state.roundGuesses = {};
+    state.phase = "roll";
+    save();
+
+    buildDiceInputs();
+    renderStatus();
+    renderHistory();
+    restorePhase();
+    window.scrollTo({top: 0, behavior:"smooth"});
+  }
+
+  function renderEndState() {
+    if (state.endReason === "winners") {
+      const names = state.winnerIds.map(id => state.players.find(p => p.id === id)?.name).filter(Boolean);
+      els.winnerTitle.textContent = names.length > 1 ? "Gezamenlijk gewonnen!" : "Gewonnen!";
+      els.winnerText.textContent = names.length > 1
+        ? `${names.join(" & ")} hebben in ronde ${state.round} hun pincode goed geraden.`
+        : `${names[0]} heeft in ronde ${state.round} de pincode goed geraden.`;
+    } else {
+      els.winnerTitle.textContent = "Spel voorbij";
+      els.winnerText.textContent = "Alle spelers hebben drie foutpogingen gebruikt. Er is deze keer geen winnaar.";
+    }
+  }
+
+  function renderHistory() {
+    if (!state || !state.history.length) {
+      els.historyCard.classList.add("hidden");
+      return;
+    }
+    els.historyCard.classList.remove("hidden");
+    els.history.innerHTML = "";
+
+    [...state.history].reverse().forEach(h => {
+      const d = document.createElement("details");
+      d.className = "history-item";
+      const rows = state.players.map(p => {
+        const res = h.results[p.id];
+        if (!res) return "";
+        const g = h.guesses[p.id];
+        const guessText = !g ? "" : g.skipped ? "overgeslagen" : g.correct ? "goed geraden" : "fout geraden";
+        return `<div class="tiny" style="margin-top:6px">${escapeHtml(p.name)}: ✓ ${res.exact}, ? ${res.misplaced}${guessText ? ` · ${guessText}` : ""}</div>`;
+      }).join("");
+      d.innerHTML = `<summary>Ronde ${h.round} · worp ${h.roll}</summary>${rows}`;
+      els.history.appendChild(d);
+    });
+  }
+
+  function renderSecrets() {
+    if (!state) return;
+    els.secretList.innerHTML = "";
+    state.players.forEach(p => {
+      const row = document.createElement("div");
+      row.className = "secret-row";
+      row.innerHTML = `
+        <strong>${escapeHtml(p.name)}</strong>
+        <span class="secret-code">${p.secret}</span>
+      `;
+      els.secretList.appendChild(row);
+    });
+  }
+
+  function showCancelConfirmation() {
+    els.cancelConfirm.classList.remove("hidden");
+    els.cancelConfirm.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+
+  function hideCancelConfirmation() {
+    els.cancelConfirm.classList.add("hidden");
+  }
+
+  function resetGame() {
+    clearSaved();
+    state = null;
+    els.cancelConfirm.classList.add("hidden");
+    els.game.classList.add("hidden");
+    els.setup.classList.remove("hidden");
+    updateResumeButton();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function updateResumeButton() {
+    const saved = loadSaved();
+    els.resumeBtn.classList.toggle("hidden", !saved);
+  }
+
+  els.playerCount.addEventListener("change", buildPlayerInputs);
+  els.startBtn.addEventListener("click", startGame);
+  els.scoreBtn.addEventListener("click", scoreRoll);
+  els.finishRoundBtn.addEventListener("click", finishRound);
+  els.resetBtn.addEventListener("click", showCancelConfirmation);
+  els.confirmCancelBtn.addEventListener("click", resetGame);
+  els.keepPlayingBtn.addEventListener("click", hideCancelConfirmation);
+  els.winnerResetBtn.addEventListener("click", resetGame);
+  els.resumeBtn.addEventListener("click", () => {
+    const saved = loadSaved();
+    if (!saved) return;
+    state = saved;
+    showGame();
+  });
+
+  buildPlayerInputs();
+  updateResumeButton();
+
+  // Offline support when hosted over HTTPS (e.g. GitHub Pages).
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(err => {
+        console.warn("Service worker kon niet worden geregistreerd:", err);
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
